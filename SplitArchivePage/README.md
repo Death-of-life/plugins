@@ -2,7 +2,8 @@
     <img src="https://typecho-fans.github.io/text-logo.svg" alt="TF Logo" title="Typecho Fans开源作品社区" align="right" height="100" />
 </a>
 
-SplitArchivePage v0.1.7 - 社区维护版
+
+SplitArchivePage v0.1.8 - 社区维护版
 ======================
 <h4 align="center">—— 在文章内部插入自定义分页符输出分页效果插件，可定制上下页导航文字，自带美化样式。</h4>
 
@@ -36,7 +37,8 @@ SplitArchivePage v0.1.7 - 社区维护版
 </table>
 
 ## 版本历史
-
+ * v0.1.8 (24-01-20 [@Death-of-life](https://github.com/Death-of-life))
+   * 兼容handsome等主题,修复无法显示文章或者只显示第一页的问题
  * v0.1.7 (20-07-12 [@jzwalk](https://github.com/jzwalk))
    * 修正插入分页符按钮为默认Markdown编辑器或通用自判断型。
  * v0.1.6 (20-02-26 [@noisky](https://github.com/noisky))
