@@ -129,10 +129,23 @@ $(function(){
                 if( strpos( $text , $splitword) !== false){
                     $contents = explode($splitword , $text );
                     $page = isset($_GET['page'])?intval($_GET['page']):1;
+                    if ($page < 1) {
+                        $page = 1;
+                    } elseif ($page > count($contents)) {
+                        $page = count($contents);
+                    }
                     $content = $contents[$page-1];
+
                     $request = Typecho_Request::getInstance();
+                    // 保存原始值
+                    $originalPage = $_GET['page'];
+                    // 生成 $pageTemplate
                     $_GET['page'] = '{page}';
-                    $pagebar = self::setPageBar(count($contents),$page,$request->getPathinfo()."?".  http_build_query($_GET));
+                    $pageTemplate = $request->getPathinfo()."?".  http_build_query($_GET);
+                    // 恢复原始值
+                    $_GET['page'] = $originalPage;
+                    
+                    $pagebar = self::setPageBar(count($contents),$page,$pageTemplate);
                 }
             }else{
                 $content = str_replace($splitword, '', $text);
@@ -142,6 +155,7 @@ $(function(){
         $text = $content.$pagebar;
         return $text;
     }
+
 
     private static function setPageBar($pageTotals,$page,$pageTemplate)
     {
