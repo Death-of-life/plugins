@@ -5,9 +5,10 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
  * 文章内部插入分页符效果 【<a href="https://github.com/typecho-fans/plugins" target="_blank">TF</a>社区维护版】
  *
  * @package SplitArchivePage
- * @author  Noisky & gouki
- * @version 0.1.7
+ * @author  EasyGod & Noisky & gouki
+ * @version 0.1.8
  * @link https://github.com/typecho-fans/plugins/tree/master/SplitArchivePage
+ * 0.1.8 修复在handsome主题下page获取出错的问题, 改进分页较多情况下的显示效果
  *
  * 0.1.7 修正插入分页符按钮为默认Markdown编辑器或通用自判断型 by Typecho Fans
  *
@@ -107,7 +108,7 @@ $(function(){
     }
 
     /**
-     * 插件实现方法（写的很挫，半夜写的，先实现以后再改。）
+     * 插件实现方法 
      *
      * @access public
      * @param string $text string
@@ -157,37 +158,45 @@ $(function(){
     }
 
 
-    private static function setPageBar($pageTotals,$page,$pageTemplate)
+    private static function setPageBar($pageTotals, $currentPage, $pageTemplate) 
     {
-		$selfOptions = Typecho_Widget::widget('Widget_Options')->plugin('SplitArchivePage');
-        $isRewrite = Typecho_Widget::widget('Widget_Options')->rewrite;
-        $siteUrl = Typecho_Widget::widget('Widget_Options')->siteUrl;
-        $pageTemplate = ($isRewrite ? rtrim($siteUrl, '/') : $siteUrl."index.php") . $pageTemplate;
-        $prevWord = isSet( $selfOptions->prev ) ? $selfOptions->prev : 'PREV';
-        $nextWord = isSet( $selfOptions->next ) ? $selfOptions->next : 'NEXT';
-        $splitPage = 3;
-        $pageHolder = array('{page}', '%7Bpage%7D');
-        if ($pageTotals < 1) {
-            return;
-        }
-        $pageBar = "<link rel='stylesheet' media='screen' type='text/css' href='".Helper::options()->pluginUrl . "/SplitArchivePage/pagebar.css"."' />";
-        $pageBar .= '<div class="archives_page_bar">';
-        //输出上一页
-        if ($page > 1) {
-            $pageBar .= '<a class="prev" href="' . str_replace($pageHolder, $page - 1, $pageTemplate) . '">'
-            . $prevWord . '</a>';
-        }
-        for ($i = 1; $i <= $pageTotals; $i ++) {
-           $pageBar .= '<a href="' .
-                str_replace($pageHolder, $i, $pageTemplate) . '" ' . ($i != $page ? '' : ' class="sel"') . '>'
-                . $i . '</a>';
-        }
-        if ($page < $pageTotals) {
-            $pageBar .= '<a class="next" href="' . str_replace($pageHolder, $page + 1, $pageTemplate)
-             . '">' . $nextWord . '</a>';
-        }
-        $pageBar .='</div>';
-        return $pageBar;
+	    $selfOptions = Typecho_Widget::widget('Widget_Options')->plugin('SplitArchivePage');
+	    $isRewrite = Typecho_Widget::widget('Widget_Options')->rewrite;
+	    $siteUrl = Typecho_Widget::widget('Widget_Options')->siteUrl;
+	    $pageTemplate = ($isRewrite ? rtrim($siteUrl, '/') : $siteUrl."index.php") . $pageTemplate;
+	    $prevWord = isset($selfOptions->prev) ? $selfOptions->prev : 'PREV';
+	    $nextWord = isset($selfOptions->next) ? $selfOptions->next : 'NEXT';
+	    $adjacentCount = 2;  // 当前页码前后显示的页码数量
+	    $pageHolder = ['{page}', '%7Bpage%7D'];
+	
+	    if ($pageTotals < 1) {
+		return;
+	    }
+	
+	    $pageBar = "<link rel='stylesheet' media='screen' type='text/css' href='".Helper::options()->pluginUrl . "/SplitArchivePage/pagebar.css"."' />";
+	    $pageBar .= '<div class="archives_page_bar">';
+	
+	    // 输出上一页
+	    if ($currentPage > 1) {
+		$pageBar .= '<a class="prev" href="' . str_replace($pageHolder, $currentPage - 1, $pageTemplate) . '">' . $prevWord . '</a>';
+	    }
+	
+	    // 输出页码
+	    for ($i = 1; $i <= $pageTotals; $i++) {
+		if ($i == 1 || $i == $pageTotals || ($i >= $currentPage - $adjacentCount && $i <= $currentPage + $adjacentCount)) {
+		    $pageBar .= '<a href="' . str_replace($pageHolder, $i, $pageTemplate) . '" ' . ($i != $currentPage ? '' : ' class="sel"') . '>' . $i . '</a>';
+		} else if ($i == $currentPage - $adjacentCount - 1 || $i == $currentPage + $adjacentCount + 1) {
+		    $pageBar .= '<span class="dots">...</span>';
+		}
+	    }
+	
+	    // 输出下一页
+	    if ($currentPage < $pageTotals) {
+		$pageBar .= '<a class="next" href="' . str_replace($pageHolder, $currentPage + 1, $pageTemplate) . '">' . $nextWord . '</a>';
+	    }
+	
+	    $pageBar .= '</div>';
+	    return $pageBar;
     }
 
 }
